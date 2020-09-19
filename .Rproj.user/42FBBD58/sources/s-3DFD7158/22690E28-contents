@@ -1,0 +1,88 @@
+
+setwd("G:/My Drive/MyResearch/21.Cooperation/ChinaRsProject/DataAndR_V2")
+
+ChinaSR_Q10<- read.csv("6.Q10ByVeg.csv")
+
+attach(ChinaSR_Q10)
+
+
+
+
+#**************************************************************************
+# Q10 histgram: http://www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)/#Helper functions
+
+head(ChinaSR_Q10)
+
+summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
+                      conf.interval=.95, .drop=TRUE) {
+  library(plyr)
+  
+  # New version of length which can handle NA's: if na.rm==T, don't count them
+  length2 <- function (x, na.rm=FALSE) {
+    if (na.rm) sum(!is.na(x))
+    else       length(x)
+  }
+  
+  # This does the summary. For each group's data frame, return a vector with
+  # N, mean, and sd
+  datac <- ddply(data, groupvars, .drop=.drop,
+                 .fun = function(xx, col) {
+                   c(N    = length2(xx[[col]], na.rm=na.rm),
+                     mean = mean   (xx[[col]], na.rm=na.rm),
+                     sd   = sd     (xx[[col]], na.rm=na.rm)
+                   )
+                 },
+                 measurevar
+  )
+  
+  # Rename the "mean" column    
+  datac <- rename(datac, c("mean" = measurevar))
+  
+  datac$se <- datac$sd / sqrt(datac$N)  # Calculate standard error of the mean
+  
+  # Confidence interval multiplier for standard error
+  # Calculate t-statistic for confidence interval: 
+  # e.g., if conf.interval is .95, use .975 (above/below), and use df=N-1
+  ciMult <- qt(conf.interval/2 + .5, datac$N-1)
+  datac$ci <- datac$se * ciMult
+  
+  return(datac)
+}
+
+
+tgc <- summarySE(ChinaSR_Q10, measurevar="Q10", groupvars=c("IGBP"))
+tgc
+
+mean(ChinaSR_Q10$Q10)
+
+pd <- position_dodge(0.1) # move them .05 to the left and right
+
+
+Q10Hist <- ggplot (tgc, aes(x = IGBP, y = Q10))
+
+Q10Hist + geom_bar(position=position_dodge(), stat="identity", fill="gray",width=.75) +
+  theme(legend.title=element_blank()) +
+  labs(x="Vegetation type", y= expression(Q[10]))+ 
+  #geom_errorbar(aes(ymin=Q10-se, ymax=Q10+se), colour="blank", width=.1)+
+  #annotate("text", x = 1, y = 2, label = "b", cex = 5)+ 
+  
+  theme_bw() +
+  annotate("text", x = 2, y = 2.25, label = "( d )", cex = 5, col = 'black')
+  # annotate("text", x = 1, y = 2.0, label = "I", cex = 5)+ # BSV
+  # annotate("text", x = 2, y = 2.0, label = "C", cex = 5)+ # CRO
+  # annotate("text", x = 3, y = 2.0, label = "G", cex = 5)+ # CSH
+  # annotate("text", x = 4, y = 2.0, label = "D", cex = 5)+ # CVM
+  # annotate("text", x = 5, y = 2.0, label = "H", cex = 5)+ # DBF
+  # annotate("text", x = 6, y = 2.2, label = "B", cex = 5)+ # EBF
+  # annotate("text", x = 7, y = 2.0, label = "F", cex = 5)+ # ENF
+  # annotate("text", x = 8, y = 2.0, label = "E", cex = 5)+ # GRA
+  # annotate("text", x = 9, y = 2.5, label = "A", cex = 5)+ # MF
+  # annotate("text", x = 10, y = 2.0, label = "D", cex = 5)+ # OSH
+  # annotate("text", x = 11, y = 2.0, label = "D", cex = 5)+ # SNO
+  # annotate("text", x = 12, y = 2.0, label = "D", cex = 5) # URB
+
+
+ggsave("6.2 Q10.jpg", width = 16, height = 11, units = "cm")
+
+
+

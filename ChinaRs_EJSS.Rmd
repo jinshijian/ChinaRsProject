@@ -1,0 +1,234 @@
+---
+title: "ChinaRs_EJSS"
+author: "Jinshi"
+date: "9/17/2020"
+output: html_document
+---
+
+# Load package
+```{r load package, message=FALSE, include=FALSE, echo=FALSE}
+package_list <- c("cowplot","data.table","dplyr","ggplot2", "lubridate", "leaflet"
+                  ,"kableExtra","knitr","ggmap","maps","mapdata","tidyr","sp","ggpubr"
+                  ,"readxl")
+package_new <- package_list[!(package_list %in% installed.packages()[,"Package"])]
+if(length(package_new)) install.packages(package_new)
+
+library(cowplot)
+library(data.table)
+library(dplyr)
+library(ggplot2)
+theme_set(theme_bw())
+library(lubridate)
+library(kableExtra)
+library(knitr)
+library("ggpubr")
+library(tidyr)
+library("leaflet")
+library(sp)
+library(readxl)
+devtools::install_github("thomasp85/patchwork")
+library(patchwork)
+library(multcompView)
+library(agricolae)
+```
+
+```{r self define functions}
+summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
+                      conf.interval=.95, .drop=TRUE) {
+  library(plyr)
+  
+  # New version of length which can handle NA's: if na.rm==T, don't count them
+  length2 <- function (x, na.rm=FALSE) {
+    if (na.rm) sum(!is.na(x))
+    else       length(x)
+  }
+  
+  # This does the summary. For each group's data frame, return a vector with
+  # N, mean, and sd
+  datac <- ddply(data, groupvars, .drop=.drop,
+                 .fun = function(xx, col) {
+                   c(N    = length2(xx[[col]], na.rm=na.rm),
+                     mean = mean   (xx[[col]], na.rm=na.rm),
+                     sd   = sd     (xx[[col]], na.rm=na.rm)
+                   )
+                 },
+                 measurevar
+  )
+  
+  # Rename the "mean" column    
+  datac <- rename(datac, c("mean" = measurevar))
+  
+  datac$se <- datac$sd / sqrt(datac$N)  # Calculate standard error of the mean
+  
+  # Confidence interval multiplier for standard error
+  # Calculate t-statistic for confidence interval: 
+  # e.g., if conf.interval is .95, use .975 (above/below), and use df=N-1
+  ciMult <- qt(conf.interval/2 + .5, datac$N-1)
+  datac$ci <- datac$se * ciMult
+  
+  return(datac)
+}
+```
+
+
+```{r load data}
+ChineseRs_Validation <- read.csv("data/ChinaRsValidation.csv", header=T)
+ChinaSRComapre <- read.csv("data/ValidationCompareHis.csv")
+CSRDBModelTesting <- read.csv("data/CSRDBMonthlyTesting.csv", header=T)
+ChinaSRDB<- read.csv("data/ChinaSRDB.csv")
+ChineseRs_TimeSeries <- read.csv('data/ChineseRs_TimeSeries.csv', header = T)
+CSRDBModelTesting$MDY <- as.Date(CSRDBModelTesting$YearMonth,"%m/%d/%y")
+```
+
+# Setup
+```{r preliminaries, message=FALSE, include=FALSE, echo=FALSE, cache=TRUE}
+# Set chunks defaults, these options will be applied to all subsequent chunks
+knitr::opts_chunk$set(message = TRUE, include = TRUE, echo = FALSE,
+                      fig.height = 4, fig.width = 8)
+
+```
+
+```{r Figure 2, fig.height = 6, fig.width = 12}
+ChinaSRDB %>% 
+  ggplot (aes(x = Measure_Year, y = Rs_Norm)) + 
+  geom_point(aes(colour = as.factor(IGBP_FromPaper))) + theme_bw() +
+  theme(legend.title=element_blank(), legend.background = element_rect(fill = alpha('white', 0), colour = 'white')) + 
+  theme(legend.position = c(0.15,0.59))+
+  theme(text = element_text(size=20), axis.text.x = element_text(angle=0, hjust=0.5))+
+  labs(x="Year(1992~2013)", y= expression("Rs ( g C "*m^{-2}* day^{-1}*" )"))+
+  annotate("text", x = 1993.5, y = 11, label = "( a )", cex = 7.5) ->
+  f2_panel_a
+
+
+## panel b
+# HSD test
+fit <- aov(Rs_Norm ~ IGBP_FromPaper, data=ChinaSRDB)
+summary(fit)
+
+posthoc <- TukeyHSD(fit, conf.level=0.95)
+letters <- multcompLetters4 (fit, posthoc)
+print(letters)
+
+summarySE(ChinaSRDB, measurevar="Rs_Norm", groupvars=c("IGBP_FromPaper")) %>% 
+  ggplot (aes(x = IGBP_FromPaper, y = Rs_Norm)) + 
+  geom_bar(position=position_dodge(), stat="identity", fill="sky blue",width=.75) +
+  xlab ("Vegetation type") + ylab( expression("Rs ( g C "*m^{-2}* day^{-1}*" )") )  +
+  geom_errorbar(aes(ymin=Rs_Norm-se, ymax=Rs_Norm+se), colour="black", width=.1)+
+  annotate("text", x = 1, y = 1, label = "F", cex = 5)+
+  annotate("text", x = 2, y = 2, label = "E", cex = 5)+
+  annotate("text", x = 3, y = 3.2, label = "A,B", cex = 5)+
+  annotate("text", x = 4, y = 2.25, label = "D,E", cex = 5)+
+  annotate("text", x = 5, y = 3.3, label = "A", cex = 5)+
+  annotate("text", x = 6, y = 2.35, label = "C,D", cex = 5)+
+  annotate("text", x = 7, y = 1.6, label = "F", cex = 5)+
+  annotate("text", x = 8, y = 2.65, label = "B,C", cex = 5)+
+  annotate("text", x = 9, y = 3.65, label = "A-E", cex = 5)+
+  annotate("text", x = 10, y = 2.05, label = "A-F", cex = 5)+
+  annotate("text", x = 1.5, y = 3.52, label = "( b )", cex = 7.5)+ theme_bw() +
+  theme( legend.title=element_blank() ) +
+  theme( text = element_text(size=20), axis.text.x = element_text(angle=0, hjust=0.5) ) ->
+  f2_panel_b
+
+f2_panel_a + f2_panel_b
+```
+
+
+```{r}
+ggplot (ChinaSRDB, aes(x = Tm, y = LogRs)) + 
+  geom_point(aes(colour = factor(IGBP_group), alpha = 0.5)) + 
+  geom_smooth(method = "lm", se = TRUE) + 
+  facet_wrap(~IGBP_group, nrow = 3) +
+  theme_bw() +
+  theme(legend.title=element_blank()) +
+  labs(x=expression("Air temperature (" *degree~c *")"), y= expression("Rs g C "*m^{-2}* day^{-1}))+
+  theme(legend.position="none") 
+
+ggplot (ChinaSRDB, aes(x = Pm, y = LogRs)) + 
+  geom_point(aes(colour = factor(IGBP_group), alpha = 0.5)) + 
+  geom_smooth(method = "lm", se = TRUE) + 
+  facet_wrap(~IGBP_group, nrow = 3) +
+  theme_bw() +
+  theme(legend.title=element_blank()) +
+  labs(x=expression("Air temperature (" *degree~c *")"), y= expression("Rs g C "*m^{-2}* day^{-1}))+
+  theme(legend.position="none") 
+
+ggplot (ChinaSRDB, aes(x = LAI, y = LogRs)) + 
+  geom_point(aes(colour = factor(IGBP_group), alpha = 0.5)) + 
+  geom_smooth(method = "lm", se = TRUE) + 
+  facet_wrap(~IGBP_group, nrow = 3) +
+  theme_bw() +
+  theme(legend.title=element_blank()) +
+  labs(x=expression("Air temperature (" *degree~c *")"), y= expression("Rs g C "*m^{-2}* day^{-1}))+
+  theme(legend.position="none") 
+```
+
+```{r, fig.height=8, fig.width=8}
+CSRDBModelTesting %>% 
+  ggplot(aes(MDY, Rs_Norm)) +
+  geom_point(shape = 1) +
+  geom_point(aes(MDY, Rs_Estimate)) +
+  geom_line() +
+  theme_bw() +
+  facet_wrap(~IGBP_FromPaper, scales = "free", ncol = 2) +
+  labs(x=element_blank(),
+       y= expression(Soil~respiration~(g~C~m^{-2}~day^{-1})))
+```
+
+
+```{r Uncertainty and sensitivity analysis}
+## Chinese modeling
+slr <- lm(ChinaSRDB$LogRs ~ ChinaSRDB$Tm + ChinaSRDB$Pm + ChinaSRDB$LAI)
+
+summary(slr)
+
+slr$fitted.values
+
+predict(slr, se.fit = T)$se.fit  
+
+predict(slr, interval = "confidence")
+
+ChinaSRDB$Rs_pred <- exp(slr$fitted.values)
+ChinaSRDB$Rs_pred_se <- exp(predict(slr, se.fit = T)$se.fit)  
+ChinaSRDB$Rs_pred_lwr <- exp(predict(slr, interval = "confidence")[,2]) 
+ChinaSRDB$Rs_pred_upr <- exp(predict(slr, interval = "confidence")[,3]) 
+hist(ChinaSRDB$Rs_pred_se)
+
+mean(ChinaSRDB$Rs_pred_se) / mean(ChinaSRDB$Rs_pred)
+
+mean(abs(ChinaSRDB$Rs_pred_lwr - ChinaSRDB$Rs_pred_se)) / mean(ChinaSRDB$Rs_pred)
+mean(abs(ChinaSRDB$Rs_pred_upr - ChinaSRDB$Rs_pred_se)) / mean(ChinaSRDB$Rs_pred)
+```
+
+```{r Linear regression}
+## all data
+ChinaSRDB$IGBP_FromPaper %>% unique()
+lm(data = ChinaSRDB, lnRs ~ Tm + IGBP_FromPaper) %>% summary()
+lm(data = ChinaSRDB, lnRs ~ Pm * IGBP_FromPaper) %>% summary()
+
+# For CVM and URB data from MGRsD should be used because not enough data ppoints from China available
+
+# 3.1 Linear regression for BSV
+lm(data = ChinaSRDB %>% filter(IGBP_FromPaper == 'BSV'), lnRs ~ Tm + Pm + GSOC ) %>% summary()
+
+# 3.2 CRO
+lm(data = ChinaSRDB %>% filter(IGBP_FromPaper == 'CRO'), lnRs ~ Tm + Tm2) %>% summary()
+
+# 3.3 CSH
+lm(data = ChinaSRDB %>% filter(IGBP_FromPaper == 'CSH'), lnRs ~ Tm + Tm2 + LAI + Longitude) %>% summary()
+
+# 3.4 DBF
+lm(data = ChinaSRDB %>% filter(IGBP_FromPaper == 'DBF'), lnRs ~ Tm + Pm + LAI) %>% summary()
+
+#3.5 EBF
+lm(data = ChinaSRDB %>% filter(IGBP_FromPaper == 'EBF'), lnRs ~ Tm + Longitude) %>% summary()
+
+# 3.6 ENF
+lm(data = ChinaSRDB %>% filter(IGBP_FromPaper == 'ENF'), lnRs ~ Tm + Tm2 + Pm) %>% summary()
+
+# 3.7 GRA
+lm(data = ChinaSRDB %>% filter(IGBP_FromPaper == 'GRA'), lnRs ~ Tm + Tm2 + Pm) %>% summary()
+
+# 3.8 MF
+lm(data = ChinaSRDB %>% filter(IGBP_FromPaper == 'MF'), lnRs ~ Tm + Tm2 + Pm) %>% summary()
+```
+

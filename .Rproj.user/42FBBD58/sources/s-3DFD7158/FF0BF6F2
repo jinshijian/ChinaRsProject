@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1600370439200.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1282625943",
+    "id" : "FF0BF6F2",
+    "lastKnownWriteTime" : 1600478680,
+    "last_content_update" : 1600478680817,
+    "path" : "~/Documents/PNNL/ChinaRsProject/ChinaRs_EJSS.Rmd",
+    "project_path" : "ChinaRs_EJSS.Rmd",
+    "properties" : {
+        "cursorPosition" : "135,0",
+        "scrollLine" : "133",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

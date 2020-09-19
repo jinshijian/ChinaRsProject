@@ -1,0 +1,17 @@
+
+setwd("G:/My Drive/MyResearch/21.Cooperation/DataAndR_V2")
+
+CorrelationTest<- read.csv("10.CorrelationTest.csv")
+
+attach(CorrelationTest)
+
+#**************************************************************************
+# get factors correlation table
+#**************************************************************************
+
+head(CorrelationTest)
+
+
+correlation <- cor(CorrelationTest[,c(2:20)],method = 'spearman')
+
+summary(cor(Log.Rs., Latitude, method = 'spearman'))

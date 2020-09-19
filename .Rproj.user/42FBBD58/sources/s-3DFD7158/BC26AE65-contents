@@ -1,0 +1,571 @@
+
+# 
+rm(list=ls())
+setwd("E:/VT/MyResearch/21.ChinaSRProject/DataAndR_V2")
+
+
+ChinaSRDB<-read.csv("ChinaSRDB.csv")
+attach (ChinaSRDB)
+
+
+
+# windows(width=8,height=6)
+
+
+par( mar=c(2, 0.2, 0.2, 0.2)
+     , mai=c(0.2, 0.2, 0.1, 0.1)  # by inches, inner margin
+     , omi = c(0.3, 0.3, 0.1, 0.1)  # by inches, outer margin 
+     , mgp = c(0, 0.1, 0) # set distance of axis
+     , tcl = 0.4
+     , cex.axis = 1.1
+     , mfrow=c(4,2))
+
+###############################################################################################
+#1 Plot and check snowcover and its affect on breakpoint  ##1 For climate type A
+
+Veg_BSV <- ChinaSRDB[IGBP_FromPaper =="BSV",]
+head(ChinaSRDB)
+levels(IGBP_FromPaper)
+
+plot (Veg_BSV$Rs_Norm ~ Veg_BSV$Pm
+      , pch = 19
+      , col = "gray"
+      , las = 1
+      , cex = 0.5
+      , xlab = ""
+      , ylab = ""
+      , yaxt = "n"
+      , xlim = c(0,600)
+      , ylim = c(0,15)
+      #, data = ChinaSRDB
+)
+
+axis(side=2,las=1,cex=1.1, at = c(0,5,10,15), font=1.5)
+#mtext(side = 1, text = "Ts", line = 1.5, cex=0.75, font=2)
+text(0,11,"BSV\n\n", adj = 0 , cex = 1, font = 2)
+
+# (1.1) First order Exponential model
+
+
+Veg_BSV.nls <- nls(Rs_Norm ~ b * (Pm + P)/(k + Pm + P)
+                    , data = Veg_BSV, start = list(b = 2.15, k = 19, P = 16.56), trace = TRUE)
+
+?nls()
+summary(Veg_BSV.nls)
+
+
+# curve(4.3507 * (x + 16.2495)/(14.0803 + x + 16.2495) 
+#       , 0, 654, col="sky blue", cex=0.5, pch=1, lty = 1, lwd = 2, add = T)
+
+# lines(Veg_BSV.nls$Pm, fitted(Veg_BSV.nls), col = "black", data = Veg_BSV)
+
+#text(400,11,"b(P_Value < 0.001**)\nk(P_Value = 0.018*)\nP(P_Value = 0.04*)", adj = 0 , cex = 1, font = 2)
+text(400,11,"IER  (AIC) NA\nSLR (AIC) = 145.6\nPLR (AIC) = 145.6", adj = 0 , cex = 1, font = 2)
+
+# (1.2) linear regression
+Veg_BSV.Lm <- lm(Rs_Norm ~ Pm, data = Veg_BSV)
+summary(Veg_BSV.Lm )
+#abline (Veg_BSV.Lm, col = "black", lty = 2, lwd = 2)
+curve(0.329184 + 0.010546*x  
+      , 0, 120, col="black", cex=0.5, pch=1, lty = 2, lwd = 2, add = T)
+
+# (1.3) polynomial regression
+
+Veg_BSV.Poly <- lm(Rs_Norm ~ poly(Pm, 2, raw=TRUE), data = Veg_BSV)
+summary(Veg_BSV.Poly)
+curve(0.4879 + 0.0002914*x + 0.00009958*x^2 , 0, 120, col="maroon", cex=1, lwd = 2,  pch=1, add = T)
+
+# (1.4) compare AIC value of different model
+
+# AIC(Veg_BSV.nls)
+AIC(Veg_BSV.Lm)
+AIC(Veg_BSV.Poly)
+
+legend(x=330, y=14.5, adj = 0, lwd=2
+       , legend=c(" "," "," ")
+       , lty = c(1,2,1), col=c("white","black","maroon")
+       , bty="n", cex=1)
+
+
+
+#****************************************************************************************************
+
+##2 For climate type B
+Veg_CRO <- ChinaSRDB[IGBP_FromPaper =="CRO",]
+
+
+plot (Rs_Norm[IGBP_FromPaper =="CRO"] ~ Pm[IGBP_FromPaper =="CRO"]
+      , pch = 19
+      , col = "gray"
+      , las = 1
+      , cex = 0.5
+      , xlab = ""
+      , ylab = "" 
+      , yaxt = "n"
+      , ylim = c(0,15)
+      , xlim = c(0,600)
+      , data = ChinaSRDB)
+
+axis(side=2,las=1,cex=1.1, at = c(0,5,10,15), font=1.5)
+#mtext(side = 1, text = "Ta", line = 1.5, cex=0.75, font=2)
+text(0,11,"CRO\n\n", adj = 0 , cex = 1, font = 2)
+
+
+# (2.1) First order Exponential model
+
+
+Veg_CRO.nls <- nls(Rs_Norm ~ b * (Pm + P)/(k + Pm + P)
+                    , data = Veg_CRO, start = list(b = 2.15, k = 19, P = 16.56), trace = TRUE)
+
+summary(Veg_CRO.nls)
+
+
+#curve(4.871 * (x + 83.354)/(249.183 + x + 83.354) 
+#      , 0, 250, col="sky blue", cex=0.5, pch=1, lty = 1, lwd = 2, add = T)
+
+
+
+# lines(Veg_BSV.nls$Pm, fitted(Veg_BSV.nls), col = "black", data = Veg_BSV)
+# text(150,11,"b(P_Value = 0.151)\nk(P_Value = 0.495)\nP(P_Value = 0.101)", adj = 0 , cex = 1, font = 2)
+
+
+# (2.2) linear regression
+Veg_CRO.Lm <- lm(Rs_Norm ~ Pm, data = Veg_CRO)
+summary(Veg_CRO.Lm )
+#abline (Veg_CRO.Lm, col = "black", lty = 2, lwd = 2)
+
+curve(1.264314 + 0.007715*x  
+      , 0, 250, col="black", cex=0.5, pch=1, lty = 2, lwd = 2, add = T)
+
+
+# (2.3) polynomial regression
+
+Veg_CRO.Poly <- lm(Rs_Norm ~ poly(Pm, 2, raw=TRUE), data = Veg_CRO)
+summary(Veg_CRO.Poly)
+#curve(1.241 + 0.009225*x - 0.00001007*x^2 , 0, 250, col="maroon", cex=1, lwd = 2,  pch=1, add = T)
+
+# (2.4) compare AIC value of different model
+
+AIC(Veg_CRO.nls)
+AIC(Veg_CRO.Lm)
+AIC(Veg_CRO.Poly)
+
+#text(400,11,"IER  (AIC) = 2661.4\nSLR (AIC) = 2660.0\nPLR (AIC) = 2661.6", adj = 0 , cex = 1, font = 2)
+
+#legend(x=330, y=14.5, adj = 0, lwd=2
+#       , legend=c(" "," "," ")
+#       , lty = c(1,2,1), col=c("sky blue","black","maroon")
+#       , bty="n", cex=1)
+
+#****************************************************************************************************
+
+##3 For climate type Cf
+Veg_CSH <- ChinaSRDB[IGBP_FromPaper =="CSH",]
+
+plot (Rs_Norm[IGBP_FromPaper =="CSH"] ~ Pm[IGBP_FromPaper =="CSH"]
+      , pch = 19
+      , col = "gray"
+      , las = 1
+      , cex = 0.5
+      , xlab = ""
+      , ylab = "" 
+      , yaxt = "n"
+      , xlim = c(0,600)
+      , ylim = c(0,15)
+      , data = ChinaSRDB)
+
+axis(side=2,las=1,cex=1.1, at = c(0,5,10,15), font=1.5)
+#mtext(side = 1, text = "Ta", line = 1.5, cex=0.75, font=2)
+text(0,11,"Temperate humid (Cf)\n\n", adj = 0 , cex = 1, font = 2)
+#mtext(side = 2, text = "Log(Rs)", line = 1.75, cex=0.75, font=2)
+
+
+# (3.1) First order Exponential model
+
+
+Veg_CSH.nls <- nls(Rs_Norm ~ b * (Pm + P)/(k + Pm + P)
+                    , data = Veg_CSH, start = list(b = 2.15, k = 19, P = 16.56), trace = TRUE)
+
+summary(Veg_CSH.nls)
+
+
+curve(6.35 * (x + 143.433)/(433.123 + x + 143.433) 
+      , 0, 800, col="sky blue", cex=0.5, pch=1, lty = 1, lwd = 2, add = T)
+
+# lines(Veg_CSH.nls$Pm, fitted(Veg_CSH.nls), col = "black", data = Veg_CSH)
+# text(400,11,"b(P_Value < 0.001**)\nk(P_Value = 0.037*)\nP(P_Value < 0.001**)", adj = 0 , cex = 1, font = 2)
+
+# (3.2) linear regression
+Veg_CSH.Lm <- lm(Rs_Norm ~ Pm, data = Veg_CSH)
+summary(Veg_CSH.Lm )
+#abline (Veg_CSH.Lm, col = "black", lty = 2, lwd = 2)
+curve(1.7241698 + 0.0050925*x  
+      , 0, 800, col="black", cex=0.5, pch=1, lty = 2, lwd = 2, add = T)
+
+
+# (3.3) polynomial regression
+
+Veg_CSH.Poly <- lm(Rs_Norm ~ poly(Pm, 2, raw=TRUE), data = Veg_CSH)
+summary(Veg_CSH.Poly)
+curve(1.576 + 0.007911*x - 0.000007921*x^2 , 0, 800, col="maroon", cex=1, lwd = 2,  pch=1, add = T)
+
+# (3.4) compare AIC value of different model
+
+AIC(Veg_CSH.nls)
+AIC(Veg_CSH.Lm)
+AIC(Veg_CSH.Poly)
+
+text(400,11,"IER  (AIC) = 20972.8\nSLR (AIC) = 20987.2\nPLR (AIC) = 20967.2", adj = 0 , cex = 1, font = 2)
+
+legend(x=330, y=14.5, adj = 0, lwd=2
+       , legend=c(" "," "," ")
+       , lty = c(1,2,1), col=c("sky blue","black","maroon")
+       , bty="n", cex=1)
+
+#****************************************************************************************************
+
+##4 For climate type Cs
+Veg_DBF <- ChinaSRDB[IGBP_FromPaper =="DBE",]
+
+
+plot (Rs_Norm[IGBP_FromPaper =="DBE"] ~ Pm[IGBP_FromPaper =="DBE"]
+      , pch = 19
+      , col = "gray"
+      , las = 1
+      , cex = 0.5
+      , xlab = ""
+      , ylab = "" 
+      , yaxt = "n"
+      , xlim = c(0,600)
+      , ylim = c(0,15)
+      , data = ChinaSRDB)
+
+axis(side=2,las=1,cex=1.1, at = c(0,5,10,15), font=1.5)
+#mtext(side = 1, text = "Ta", line = 1.5, cex=0.75, font=2)
+text(0,11,"Temperate summer dry (Cs)\n\n", adj = 0 , cex = 1, font = 2)
+#mtext(side = 2, text = "Log(Rs)", line = 1.75, cex=0.75, font=2)
+
+
+# (4.1) First order Exponential model
+
+
+Veg_DBF.nls <- nls(Rs_Norm ~ b * (Pm + P)/(k + Pm + P)
+                    , data = Veg_DBF, start = list(b = 2.15, k = 19, P = 16.56), trace = TRUE)
+
+summary(Veg_DBF.nls)
+
+
+#curve(2.27896 * (x + 2.01319)/(0.67687 + x + 2.01319) 
+#      , 0, 600, col="sky blue", cex=0.5, pch=1, lty = 1, lwd = 2, add = T)
+
+#text(400,11,"b(P_Value < 0.001**)\nk(P_Value = 0.332)\nP(P_Value = 0.370)", adj = 0 , cex = 1, font = 2)
+
+
+# (4.2) linear regression
+Veg_DBF.Lm <- lm(Rs_Norm ~ Pm, data = Veg_DBF)
+summary(Veg_DBF.Lm )
+#abline (Veg_DBF.Lm, col = "black", lty = 2, lwd = 2)
+
+#curve(2.2160527 - 0.0006381*x  
+#      , 0, 600, col="black", cex=0.5, pch=1, lty = 2, lwd = 2, add = T)
+
+
+# (4.3) polynomial regression
+
+Veg_DBF.Poly <- lm(Rs_Norm ~ poly(Pm, 2, raw=TRUE), data = Veg_DBF)
+summary(Veg_DBF.Poly)
+curve(2.106 + 0.003115*x - 0.000014*x^2 , 0, 600, col="maroon", cex=1, lwd = 2,  pch=1, add = T)
+
+# (4.4) compare AIC value of different model
+
+AIC(Veg_DBF.nls)
+AIC(Veg_DBF.Lm)
+AIC(Veg_DBF.Poly)
+
+#text(400,11,"IER  (AIC) = 5031.0\nSLR (AIC) = 5042.1\nPLR (AIC) = 5035.0", adj = 0 , cex = 1, font = 2)
+
+#legend(x=330, y=14.5, adj = 0, lwd=2
+#       , legend=c(" "," "," ")
+#       , lty = c(1,2,1), col=c("sky blue","black","maroon")
+#       , bty="n", cex=1)
+
+#****************************************************************************************************
+
+##5 For climate type Cw
+Veg_EBF <- ChinaSRDB[IGBP_FromPaper =="EBF",]
+
+
+plot (Rs_Norm[IGBP_FromPaper =="EBF"] ~ Pm[IGBP_FromPaper =="EBF"]
+      , pch = 19
+      , col = "gray"
+      , las = 1
+      , cex = 0.5
+      , xlab = ""
+      , ylab = "" 
+      , yaxt = "n"
+      , xlim = c(0,600)
+      , ylim = c(0,15)
+      , data = ChinaSRDB)
+
+axis(side=2,las=1,cex=1.1, at = c(0,5,10,15), font=1.5)
+#mtext(side = 1, text = "Ta", line = 1.5, cex=0.75, font=2)
+text(0,11,"Temperate winter dry (Cw)\n\n", adj = 0 , cex = 1, font = 2)
+#mtext(side = 2, text = "Log(Rs)", line = 1.75, cex=0.75, font=2)
+
+
+
+# (5.1) First order Exponential model
+
+
+Veg_EBF.nls <- nls(Rs_Norm ~ b * (Pm + P)/(k + Pm + P)
+                    , data = Veg_EBF, start = list(b = 2.15, k = 19, P = 16.56), trace = TRUE)
+
+summary(Veg_EBF.nls)
+
+
+curve(4.7129 * (x + 31.0456)/(109.4334 + x + 31.0456) 
+      , 0, 896, col="sky blue", cex=0.5, pch=1, lty = 1, lwd = 2, add = T)
+
+# text(450,11,"b(P_Value < 0.001**)\nk(P_Value = 0.004**)\nP(P_Value = 0.004**)", adj = 0 , cex = 1, font = 2)
+
+
+# (5.2) linear regression
+Veg_EBF.Lm <- lm(Rs_Norm ~ Pm, data = Veg_EBF)
+summary(Veg_EBF.Lm )
+#abline (Veg_EBF.Lm, col = "black", lty = 2, lwd = 2)
+curve(1.5070266 + 0.0077227*x  
+      , 0, 896, col="black", cex=0.5, pch=1, lty = 2, lwd = 2, add = T)
+
+
+# (5.3) polynomial regression
+
+Veg_EBF.Poly <- lm(Rs_Norm ~ poly(Pm, 2, raw=TRUE), data = Veg_EBF)
+summary(Veg_EBF.Poly)
+curve(1.296 + 0.01255*x - 0.000014*x^2 , 0, 896, col="maroon", cex=1, lwd = 2,  pch=1, add = T)
+
+# (5.4) compare AIC value of different model
+
+AIC(Veg_EBF.nls)
+AIC(Veg_EBF.Lm)
+AIC(Veg_EBF.Poly)
+
+text(400,11,"IER  (AIC) = 2648.7\nSLR (AIC) = 2679.6\nPLR (AIC) = 2657.9", adj = 0 , cex = 1, font = 2)
+
+legend(x=330, y=14.5, adj = 0, lwd=2
+       , legend=c(" "," "," ")
+       , lty = c(1,2,1), col=c("sky blue","black","maroon")
+       , bty="n", cex=1)
+
+#****************************************************************************************************
+
+##6 For climate type Df
+Veg_ENF <- ChinaSRDB[IGBP_FromPaper =="ENF",]
+
+
+plot (Rs_Norm[IGBP_FromPaper =="ENF"] ~ Pm[IGBP_FromPaper =="ENF"]
+      , pch = 19
+      , col = "gray"
+      , las = 1
+      , cex = 0.5
+      , xlab = ""
+      , ylab = "" 
+      , yaxt = "n"
+      , xlim = c(0,600)
+      , ylim = c(0,15)
+      , data = ChinaSRDB)
+
+axis(side=2,las=1,cex=1.1, at = c(0,5,10,15), font=1.5)
+#mtext(side = 1, text = "Ta", line = 1.5, cex=0.75, font=2)
+text(0,11,"Boreal humid (Df)\n\n", adj = 0 , cex = 1, font = 2)
+#mtext(side = 2, text = "Log(Rs)", line = 1.75, cex=0.75, font=2)
+
+
+# (6.1) First order Exponential model
+
+
+Veg_ENF.nls <- nls(Rs_Norm ~ b * (Pm + P)/(k + Pm + P)
+                    , data = Veg_ENF, start = list(b = 2.15, k = 19, P = 16.56), trace = TRUE)
+
+summary(Veg_ENF.nls)
+
+
+curve(4.9154 * (x + 18.0528)/(100.8559 + x + 18.0528) 
+      , 0, 560, col="sky blue", cex=0.5, pch=1, lty = 1, lwd = 2, add = T)
+
+# text(400,11,"b(P_Value < 0.001**)\nk(P_Value < 0.001**)\nP(P_Value = 0.009**)", adj = 0 , cex = 1, font = 2)
+
+
+# (6.2) linear regression
+Veg_ENF.Lm <- lm(Rs_Norm ~ Pm, data = Veg_ENF)
+summary(Veg_ENF.Lm )
+#abline (Veg_ENF.Lm, col = "black", lty = 2, lwd = 2)
+curve(1.3668709 + 0.0111823*x  
+      , 0, 560, col="black", cex=0.5, pch=1, lty = 2, lwd = 2, add = T)
+
+# (6.3) polynomial regression
+
+Veg_ENF.Poly <- lm(Rs_Norm ~ poly(Pm, 2, raw=TRUE), data = Veg_ENF)
+summary(Veg_ENF.Poly)
+curve(1.088 + 0.01791*x - 0.00002721*x^2 , 0, 560, col="maroon", cex=1, lwd = 2,  pch=1, add = T)
+
+# (6.4) compare AIC value of different model
+
+AIC(Veg_ENF.nls)
+AIC(Veg_ENF.Lm)
+AIC(Veg_ENF.Poly)
+
+text(400,11,"IER  (AIC) = 10940.0\nSLR (AIC) = 10977.7\nPLR (AIC) = 10948.2", adj = 0 , cex = 1, font = 2)
+
+legend(x=330, y=14.5, adj = 0, lwd=2
+       , legend=c(" "," "," ")
+       , lty = c(1,2,1), col=c("sky blue","black","maroon")
+       , bty="n", cex=1)
+
+#****************************************************************************************************
+
+##7 For climate type Ds and Ds(w)
+Veg_GRA <- ChinaSRDB[IGBP_FromPaper =="GRA",]
+
+levels(IGBP_FromPaper)
+
+plot (Rs_Norm[IGBP_FromPaper =="GRA"] ~ Pm[IGBP_FromPaper =="GRA"]
+      , pch = 19
+      , col = "gray"
+      , las = 1
+      , cex = 0.5
+      , xlab = ""
+      , ylab = "" 
+      , yaxt = "n"
+      , xlim = c(0,600)
+      , ylim = c(0,15)
+      , data = ChinaSRDB)
+
+axis(side=2,las=1,cex=1.1, at = c(0,5,10,15), font=1.5)
+#mtext(side = 1, text = "Ta", line = 1.5, cex=0.75, font=2)
+text(0,11,"Boreal dry (Dsw)\n\n", adj = 0 , cex = 1, font = 2)
+#mtext(side = 2, text = "Log(Rs)", line = 1.75, cex=0.75, font=2)
+
+
+# (7.1) First order Exponential model
+
+
+Veg_GRA.nls <- nls(Rs_Norm ~ b * (Pm + P)/(k + Pm + P)
+                    , data = Veg_GRA, start = list(b = 2.15, k = 19, P = 16.56), trace = TRUE)
+
+summary(Veg_GRA.nls)
+
+
+curve(7.277 * (x + 15.706)/(176.137 + x + 15.706) 
+      , 0, 626, col="sky blue", cex=0.5, pch=1, lty = 1, lwd = 2, add = T)
+
+# text(600,9,"b(P_Value < 0.001**)\nk(P_Value < 0.001**)\nP(P_Value < 0.001**)", adj = 0 , cex = 1, font = 2)
+
+
+# (7.2) linear regression
+Veg_GRA.Lm <- lm(Rs_Norm ~ Pm, data = Veg_GRA)
+summary(Veg_GRA.Lm )
+#abline (Veg_GRA.Lm, col = "black", lty = 2, lwd = 2)
+
+curve(1.2334517 + 0.0107450*x  
+      , 0, 626, col="black", cex=0.5, pch=1, lty = 2, lwd = 2, add = T)
+
+
+# (7.3) polynomial regression
+
+Veg_GRA.Poly <- lm(Rs_Norm ~ poly(Pm, 2, raw=TRUE), data = Veg_GRA)
+summary(Veg_GRA.Poly)
+curve(0.8833 + 0.01939*x - 0.00001769*x^2 , 0, 626, col="maroon", cex=1, lwd = 2,  pch=1, add = T)
+
+# (7.4) compare AIC value of different model
+
+AIC(Veg_GRA.nls)
+AIC(Veg_GRA.Lm)
+AIC(Veg_GRA.Poly)
+
+text(400,11,"IER  (AIC) = 3375.7\nSLR (AIC) = 3494.9\nPLR (AIC) = 3394.4", adj = 0 , cex = 1, font = 2)
+
+legend(x=330, y=14.5, adj = 0, lwd=2
+       , legend=c(" "," "," ")
+       , lty = c(1,2,1), col=c("sky blue","black","maroon")
+       , bty="n", cex=1)
+
+#****************************************************************************************************
+
+##8 For climate type E
+Veg_MF <- ChinaSRDB[IGBP_FromPaper =="MF",]
+
+plot (Rs_Norm[IGBP_FromPaper =="MF"] ~ Pm[IGBP_FromPaper =="MF"]
+      , pch = 19
+      , col = "gray"
+      , las = 1
+      , cex = 0.5
+      , xlab = ""
+      , ylab = "" 
+      , yaxt = "n"
+      , xlim = c(0,600)
+      , ylim = c(0,15)
+      , data = ChinaSRDB)
+
+axis(side=2,las=1,cex=1.1, at = c(0,5,10,15), font=1.5)
+#mtext(side = 1, text = "Ta", line = 1.5, cex=0.75, font=2)
+text(0,11,"Polar (E)\n\n", adj = 0 , cex = 1, font = 2)
+#mtext(side = 2, text = "Log(Rs)", line = 1.75, cex=0.75, font=2)
+
+
+# (8.1) First order Exponential model
+
+
+Veg_MF.nls <- nls(Rs_Norm ~ b * (Pm + P)/(k + Pm + P)
+                    , data = Veg_MF, start = list(b = 2.15, k = 19, P = 16.56), trace = TRUE)
+
+summary(Veg_MF.nls)
+
+
+#curve(5.292 * (x + 8.095)/(127.132 + x + 8.095) 
+#      , 0, 250, col="sky blue", cex=0.5, pch=1, lty = 1, lwd = 2, add = T)
+
+# text(125,11,"b(P_Value = 0.007**)\nk(P_Value = 0.147)\nP(P_Value = 0.212)", adj = 0 , cex = 1, font = 2)
+
+# (8.2) linear regression
+Veg_MF.Lm <- lm(Rs_Norm ~ Pm, data = Veg_MF)
+summary(Veg_MF.Lm )
+#abline (Veg_MF.Lm, col = "black", lty = 2, lwd = 2)
+
+curve(0.545954 + 0.018554*x  
+      , 0, 250, col="black", cex=0.5, pch=1, lty = 2, lwd = 2, add = T)
+
+
+# (8.3) polynomial regression
+
+Veg_MF.Poly <- lm(Rs_Norm ~ poly(Pm, 2, raw=TRUE), data = Veg_MF)
+summary(Veg_MF.Poly)
+curve(0.3389 + 0.0315*x - 0.00009969*x^2 , 0, 250, col="maroon", cex=1, lwd = 2, pch=1, add = T)
+
+# (8.4) compare AIC value of different model
+
+AIC(Veg_MF.nls)
+AIC(Veg_MF.Lm)
+AIC(Veg_MF.Poly)
+
+text(400,11,"SLR (AIC) = 694.7\nPLR (AIC) = 689.4", adj = 0 , cex = 1, font = 2)
+
+legend(x=330, y=13.5, adj = 0, lwd=2
+       , legend=c(" "," ")
+       , lty = c(2,1), col=c("black","maroon")
+       , bty="n", cex=1)
+
+
+#9 Other
+
+
+#****************************************************************************************************
+# others 
+## common x and y axes
+
+mtext(side = 1, text = "Monthly precipitation (mm)", line = 0.8, cex=1, outer = TRUE)
+mtext(side = 2, text = expression ("Soil respiration: g C m" ^ {-2} ~ "day"^{-1}), line = 0.1, cex=1, outer = TRUE)
+mtext(side = 2, text = expression ("Soil respiration: g C m" ^ {-2} ~ "day"^{-1}), line = 0.1, cex=1, outer = TRUE)
+
+#saveGraph(file="3.4 Rs vs Pm_V2",type="tif", res=300)
+#saveGraph(file="3.4 Rs vs Pm_V3",type="pdf")
+

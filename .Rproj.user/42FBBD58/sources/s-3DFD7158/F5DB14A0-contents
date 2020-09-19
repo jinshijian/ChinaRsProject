@@ -1,0 +1,273 @@
+
+
+CSRDBModelTesting <- read.csv("8.CSRDBMonthlyTesting.csv", header=T)
+attach(CSRDBModelTesting)
+
+
+Rdate <- as.Date(CSRDBModelTesting$YearMonth,"%m/%d/%Y")
+as.Date('03/01/2008',"%m/%d/%Y")
+#fix(Rdate)
+
+
+
+#Step 1: Vegetation BSV
+head(CSRDBModelTesting)
+
+# CSRDBModelTesting$IGBP_FromPaper <- as.character(CSRDBModelTesting$IGBP_FromPaper)
+
+BSV <- CSRDBModelTesting[IGBP_FromPaper == "BSV",]
+
+# myts <- ts(data=BSV$Rs_Norm,start=c(2008,3),frequency=12)
+# plot(myts)
+
+tiff("Figure S5.tiff", width = 8, height = 7, pointsize = 1/300, units = 'in', res = 300)
+
+par( mar=c(2, 0.5, 0.2, 0.2)
+     , mai=c(0.2, 0.2, 0.1, 0.1)  # by inches, inner margin
+     , omi = c(0.3, 0.3, 0.1, 0.1)  # by inches, outer margin 
+     , mgp = c(0, 0.3, 0) # set distance of axis
+     , tcl = 0.4
+     , cex.axis = 1.1
+     , mfrow=c(4,2))
+
+plot (BSV$Rs_Norm ~ as.Date(BSV$YearMonth,"%m/%d/%Y")
+      , main=""
+      , xlab = ""
+      , ylab = ""
+      , ylim = c(0,5)
+      , pch = 1
+      , type = "l")
+
+
+points (BSV$Rs_Norm ~ as.Date(BSV$YearMonth,"%m/%d/%Y")
+        , pch = 1 )
+
+
+points (BSV$Rs_Estimate ~ as.Date(BSV$YearMonth,"%m/%d/%Y")
+        , pch = 19
+)
+
+
+text(as.Date("2008-01-10"),4.5,"BSV (2008 Mar. to 2009 Feb.)", adj = 0 , cex = 1, font = 2)
+
+legend(x=as.Date("2008-01-10"), y=4, adj = 0, lwd=1
+       , legend=c("Measured Rs","Predicted Rs")
+       , pch = c(1,19), col=c("black","black")
+       , bty="n", cex=1)
+
+
+#Step 2: Vegetation CRO
+head(CSRDBModelTesting)
+
+max(Rs_Norm[IGBP_FromPaper == "CRO"])
+
+plot (Rs_Norm[IGBP_FromPaper == "CRO"] ~ as.Date(YearMonth[IGBP_FromPaper == "CRO"],"%m/%d/%Y")
+      , main=""
+      , xlab = ""
+      , ylab = ""
+      , ylim = c(0,10)
+      , type = 'l'
+      , data = CSRDBModelTesting)
+
+points (Rs_Norm[IGBP_FromPaper == "CRO"] ~ as.Date(YearMonth[IGBP_FromPaper == "CRO"],"%m/%d/%Y")
+        , pch =1
+        , data = CSRDBModelTesting)
+
+points (Rs_Estimate[IGBP_FromPaper == "CRO"] ~ as.Date(YearMonth[IGBP_FromPaper == "CRO"],"%m/%d/%Y")
+        , pch =19
+        , data = CSRDBModelTesting)
+
+
+text(as.Date("2005-01-10"),9,"CRO (2005)", adj = 0 , cex = 1, font = 2)
+
+legend(x=as.Date("2005-01-10"), y=8, adj = 0, lwd=1
+       , legend=c("Measured Rs","Predicted Rs")
+       , pch = c(1,19), col=c("black","black")
+       , bty="n", cex=1)
+
+#Step 3: Vegetation CSH
+levels(IGBP_FromPaper)
+
+max(Rs_Norm[IGBP_FromPaper == "CSH"])
+
+plot (Rs_Norm[IGBP_FromPaper == "CSH"] ~ as.Date(YearMonth[IGBP_FromPaper == "CSH"],"%m/%d/%Y")
+      , main=""
+      , xlab = ""
+      , ylab = ""
+      , ylim = c(0,5)
+      , type = 'l'
+      , data = CSRDBModelTesting)
+
+points (Rs_Norm[IGBP_FromPaper == "CSH"] ~ as.Date(YearMonth[IGBP_FromPaper == "CSH"],"%m/%d/%Y")
+        , pch =1
+        , data = CSRDBModelTesting)
+
+points (Rs_Estimate[IGBP_FromPaper == "CSH"] ~ as.Date(YearMonth[IGBP_FromPaper == "CSH"],"%m/%d/%Y")
+        , pch =19
+        , data = CSRDBModelTesting)
+
+
+text(as.Date("2009-01-10"),4.5,"CSH (2009)", adj = 0 , cex = 1, font = 2)
+
+legend(x=as.Date("2009-01-10"), y=4, adj = 0, lwd=1
+       , legend=c("Measured Rs","Predicted Rs")
+       , pch = c(1,19), col=c("black","black")
+       , bty="n", cex=1)
+
+#Step 4: Vegetation DBF
+levels(IGBP_FromPaper)
+
+max(Rs_Norm[IGBP_FromPaper == "DBF"])
+
+plot (Rs_Norm[IGBP_FromPaper == "DBF"] ~ as.Date(YearMonth[IGBP_FromPaper == "DBF"],"%m/%d/%Y")
+      , main=""
+      , xlab = ""
+      , ylab = ""
+      , ylim = c(0,5)
+      , type = 'l'
+      , data = CSRDBModelTesting)
+
+points (Rs_Norm[IGBP_FromPaper == "DBF"] ~ as.Date(YearMonth[IGBP_FromPaper == "DBF"],"%m/%d/%Y")
+        , pch =1
+        , data = CSRDBModelTesting)
+
+points (Rs_Estimate[IGBP_FromPaper == "DBF"] ~ as.Date(YearMonth[IGBP_FromPaper == "DBF"],"%m/%d/%Y")
+        , pch =19
+        , data = CSRDBModelTesting)
+
+
+text(as.Date("2003-01-10"),4.5,"DBF (2003)", adj = 0 , cex = 1, font = 2)
+
+legend(x=as.Date("2003-01-10"), y=4, adj = 0, lwd=1
+       , legend=c("Measured Rs","Predicted Rs")
+       , pch = c(1,19), col=c("black","black")
+       , bty="n", cex=1)
+
+
+#Step 5: Vegetation EBF
+levels(IGBP_FromPaper)
+
+max(Rs_Norm[IGBP_FromPaper == "EBF"])
+
+plot (Rs_Norm[IGBP_FromPaper == "EBF"] ~ as.Date(YearMonth[IGBP_FromPaper == "EBF"],"%m/%d/%Y")
+      , main=""
+      , xlab = ""
+      , ylab = ""
+      , ylim = c(0,10)
+      , type = 'l'
+      , data = CSRDBModelTesting)
+
+points (Rs_Norm[IGBP_FromPaper == "EBF"] ~ as.Date(YearMonth[IGBP_FromPaper == "EBF"],"%m/%d/%Y")
+        , pch =1
+        , data = CSRDBModelTesting)
+
+points (Rs_Estimate[IGBP_FromPaper == "EBF"] ~ as.Date(YearMonth[IGBP_FromPaper == "EBF"],"%m/%d/%Y")
+        , pch =19
+        , data = CSRDBModelTesting)
+
+
+
+text(as.Date("2006-01-10"),9,"EBF (2006)", adj = 0 , cex = 1, font = 2)
+
+legend(x=as.Date("2006-01-10"), y=8, adj = 0, lwd=1
+       , legend=c("Measured Rs","Predicted Rs")
+       , pch = c(1,19), col=c("black","black")
+       , bty="n", cex=1)
+
+
+#Step 6: Vegetation ENF
+levels(IGBP_FromPaper)
+
+max(Rs_Norm[IGBP_FromPaper == "ENF"])
+
+plot (Rs_Norm[IGBP_FromPaper == "ENF"] ~ as.Date(YearMonth[IGBP_FromPaper == "ENF"],"%m/%d/%Y")
+      , main=""
+      , xlab = ""
+      , ylab = ""
+      , ylim = c(0,5)
+      , type = 'l'
+      , data = CSRDBModelTesting)
+
+points (Rs_Norm[IGBP_FromPaper == "ENF"] ~ as.Date(YearMonth[IGBP_FromPaper == "ENF"],"%m/%d/%Y")
+        , pch =1
+        , data = CSRDBModelTesting)
+
+points (Rs_Estimate[IGBP_FromPaper == "ENF"] ~ as.Date(YearMonth[IGBP_FromPaper == "ENF"],"%m/%d/%Y")
+        , pch =19
+        , data = CSRDBModelTesting)
+
+
+text(as.Date("2004-01-10"),4.5,"ENF (2004)", adj = 0 , cex = 1, font = 2)
+
+legend(x=as.Date("2004-01-10"), y=4, adj = 0, lwd=1
+       , legend=c("Measured Rs","Predicted Rs")
+       , pch = c(1,19), col=c("black","black")
+       , bty="n", cex=1)
+
+#Step 7: Vegetation GRA
+levels(IGBP_FromPaper)
+
+max(Rs_Norm[IGBP_FromPaper == "GRA"])
+
+plot (Rs_Norm[IGBP_FromPaper == "GRA"] ~ as.Date(YearMonth[IGBP_FromPaper == "GRA"],"%m/%d/%Y")
+      , main=""
+      , xlab = ""
+      , ylab = ""
+      , ylim = c(0,10)
+      , type = 'l'
+      , data = CSRDBModelTesting)
+
+points (Rs_Norm[IGBP_FromPaper == "GRA"] ~ as.Date(YearMonth[IGBP_FromPaper == "GRA"],"%m/%d/%Y")
+        , pch =1
+        , data = CSRDBModelTesting)
+
+points (Rs_Estimate[IGBP_FromPaper == "GRA"] ~ as.Date(YearMonth[IGBP_FromPaper == "GRA"],"%m/%d/%Y")
+        , pch =19
+        , data = CSRDBModelTesting)
+
+
+text(as.Date("2008-01-10"),9,"GRA (2008)", adj = 0 , cex = 1, font = 2)
+
+legend(x=as.Date("2008-01-10"), y=8, adj = 0, lwd=1
+       , legend=c("Measured Rs","Predicted Rs")
+       , pch = c(1,19), col=c("black","black")
+       , bty="n", cex=1)
+
+
+#Step 8: Vegetation MF
+levels(IGBP_FromPaper)
+
+max(Rs_Norm[IGBP_FromPaper == "MF"])
+
+plot (Rs_Norm[IGBP_FromPaper == "MF"] ~ as.Date(YearMonth[IGBP_FromPaper == "MF"],"%m/%d/%Y")
+      , main=""
+      , xlab = ""
+      , ylab = ""
+      , ylim = c(0,5)
+      , type = 'l'
+      , data = CSRDBModelTesting)
+
+points (Rs_Norm[IGBP_FromPaper == "MF"] ~ as.Date(YearMonth[IGBP_FromPaper == "MF"],"%m/%d/%Y")
+        , pch =1
+        , data = CSRDBModelTesting)
+
+points (Rs_Estimate[IGBP_FromPaper == "MF"] ~ as.Date(YearMonth[IGBP_FromPaper == "MF"],"%m/%d/%Y")
+        , pch =19
+        , data = CSRDBModelTesting)
+
+
+
+text(as.Date("2008-01-10"),4.5,"MF (2008)", adj = 0 , cex = 1, font = 2)
+
+legend(x=as.Date("2008-01-10"), y=4, adj = 0, lwd=1
+       , legend=c("Measured Rs","Predicted Rs")
+       , pch = c(1,19), col=c("black","black")
+       , bty="n", cex=1)
+
+
+# add labels
+mtext(side = 1, text = expression("Month"), line = 0.8, cex=1, outer = TRUE)
+mtext(side = 2, text = expression("Soil respiration (g C m" ^{-2}*" day"^{-1}*")"), line = 0.35, cex=1, outer = TRUE)
+
+dev.off()
+

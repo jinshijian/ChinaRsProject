@@ -1,0 +1,6 @@
+"0","ChineseRs_Validation <- read.csv(""data/ChinaRsValidation.csv"", header=T)"
+"0","ChinaSRComapre <- read.csv(""data/ValidationCompareHis.csv"")"
+"0","CSRDBModelTesting <- read.csv(""data/CSRDBMonthlyTesting.csv"", header=T)"
+"0","ChinaSRDB<- read.csv(""data/ChinaSRDB.csv"")"
+"0","ChineseRs_TimeSeries <- read.csv('data/ChineseRs_TimeSeries.csv', header = T)"
+"0","CSRDBModelTesting$MDY <- as.Date(CSRDBModelTesting$YearMonth,""%m/%d/%y"")"

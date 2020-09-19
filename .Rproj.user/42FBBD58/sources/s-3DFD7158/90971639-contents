@@ -1,0 +1,29 @@
+
+setwd("E:/VT/MyResearch/21.ChinaSRProject/DataAndR_V2")
+
+ChinaSRComapre<- read.csv("9.ValidationCompareHis.csv")
+
+attach(ChinaSRComapre)
+
+#**************************************************************************
+# GGplot Rs Histgram by vegetation group 
+#**************************************************************************
+
+head(ChinaSRComapre)
+
+library(ggplot2)
+
+CSR_Veg <- ggplot (ChinaSRComapre, aes(x = Model, y = Rs_Estimate))
+
+CSR_Veg + geom_bar(, stat="identity")
+
+
+CSR_Veg + geom_bar(,width=0.75, stat="identity",alpha = .6 , col="black", fill="gray")  + labs(x="Different models", y="Annual soil respiration(Pg)") +
+  theme_set(theme_gray(base_size = 5))+
+  theme_bw()+
+  theme(legend.title=element_blank()) +
+  scale_x_discrete(limits=c('ThisStudy','Raich_1992','Raich_1995','Raich_2002','Hashimoto_2015'))
+#  annotate("text", x = 1, y = 1.1, label = "b", cex = 5)
+
+
+ggsave("9. ModeledRs Compare Historical Estimates.jpg", width = 16, height = 11, units = "cm")

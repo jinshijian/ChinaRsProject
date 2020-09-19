@@ -1,0 +1,6 @@
+"0","mean(abs(ChinaSRDB$Rs_pred_upr - ChinaSRDB$Rs_pred_se)) / mean(ChinaSRDB$Rs_pred)
+"
+"1","[1]"
+"1"," 0.2686568"
+"1","
+"

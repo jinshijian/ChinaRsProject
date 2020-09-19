@@ -1,0 +1,12 @@
+# folder
+/DataAndR_V2
+/GISMap
+/OLD
+/outputs
+/Papers
+/EJSS
+
+# file
+.RData
+.Rhistory
+ChinaRs_EJSS_MissCell.Rmd
